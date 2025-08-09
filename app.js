@@ -4,7 +4,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // --- Preferences State ---
     let preferences = {
-        theme: 'light',
+        theme: 'dark',
         timeFormat: '24hr',
         dateFormat: 'mmddyyyy'
     };
@@ -21,6 +21,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const darkThemeToggle = document.getElementById("darkThemeToggle");
 
     // Modal elements
+    const addModal = document.getElementById("addModal");
     const actionModal = document.getElementById("actionModal");
     const editModal = document.getElementById("editModal");
     const deleteConfirmModal = document.getElementById("deleteConfirmModal");
@@ -44,6 +45,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function applyPreferences() {
         document.body.classList.toggle('dark-mode', preferences.theme === 'dark');
+        document.body.classList.toggle('light-mode', preferences.theme === 'light');
         darkThemeToggle.checked = preferences.theme === 'dark';
         document.querySelector(`input[name="timeFormat"][value="${preferences.timeFormat}"]`).checked = true;
         document.querySelector(`input[name="dateFormat"][value="${preferences.dateFormat}"]`).checked = true;
@@ -81,10 +83,12 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     addBtn.addEventListener("click", () => {
+        form.reset();
         document.getElementById('date').value = getTodayDateString();
         document.getElementById('time').value = getCurrentTimeString();
         document.getElementById('addAmountSign').textContent = '';
-        showView("addTransactionView");
+        document.getElementById('addAmountSign').className = 'amount-sign';
+        addModal.style.display = 'flex';
     });
 
     // --- DATE/TIME FORMATTING UTILITIES ---
@@ -101,9 +105,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function formatDisplayTime(dateObj) {
         if (preferences.timeFormat === '12hr') {
-            return dateObj.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', second: '2-digit', hour12: true });
+            return dateObj.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }).replace(/:\d+ /, ' ');
         }
-        return dateObj.toLocaleTimeString('en-GB');
+        return dateObj.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit'});
     }
     
     function formatFullDateHeader(dateObj) {
@@ -203,27 +207,19 @@ document.addEventListener("DOMContentLoaded", () => {
             current: { funds: 0, expenses: 0, savings: 0 },
             previous: { funds: 0, expenses: 0, savings: 0 }
         };
-
         const fundsCategories = ['Money'];
         const savingsCategories = ['Savings'];
-
         transactions.forEach(tx => {
             if (!tx.Date) return;
             const txDate = new Date(tx.Date);
             const amount = parseFloat(String(tx.Amount).replace(/[^0-9.-]/g, '')) || 0;
-            
             const checkPeriod = (period) => {
                 if (fundsCategories.includes(tx.Category)) period.funds += amount;
                 if (savingsCategories.includes(tx.Category)) period.savings += amount;
                 if (amount < 0) period.expenses += Math.abs(amount);
             };
-
-            if (txDate >= ranges.current.start && txDate <= ranges.current.end) {
-                checkPeriod(summary.current);
-            }
-            if (txDate >= ranges.previous.start && txDate < ranges.previous.end) {
-                checkPeriod(summary.previous);
-            }
+            if (txDate >= ranges.current.start && txDate <= ranges.current.end) { checkPeriod(summary.current); }
+            if (txDate >= ranges.previous.start && txDate < ranges.previous.end) { checkPeriod(summary.previous); }
         });
         return summary;
     }
@@ -232,10 +228,8 @@ document.addEventListener("DOMContentLoaded", () => {
         const difference = currentAmount - previousAmount;
         let comparisonText = '';
         let comparisonClass = '';
-        
         const periodText = walletTimeFilter.options[walletTimeFilter.selectedIndex].text
             .replace('This', 'last').replace('Last 24 Hours', 'previous 24 hours');
-
         if (previousAmount !== 0) {
             const moreOrLess = difference > 0 ? 'more' : 'less';
             comparisonText = `₱${Math.abs(difference).toFixed(2)} ${moreOrLess} than ${periodText.toLowerCase()}`;
@@ -246,21 +240,12 @@ document.addEventListener("DOMContentLoaded", () => {
         } else {
             comparisonText = 'No data for this period';
         }
-
-        return `
-            <div class="summary-card">
-                <div class="summary-details">
-                    <span class="summary-title">${title}</span>
-                    <span class="summary-comparison ${comparisonClass}">${comparisonText}</span>
-                </div>
-                <span class="summary-amount">₱${currentAmount.toFixed(2)}</span>
-            </div>`;
+        return `<div class="summary-card"><div class="summary-details"><span class="summary-title">${title}</span><span class="summary-comparison ${comparisonClass}">${comparisonText}</span></div><span class="summary-amount">₱${currentAmount.toFixed(2)}</span></div>`;
     }
 
     async function renderWalletView() {
         const summaryContainer = document.getElementById('walletSummaryContainer');
         summaryContainer.innerHTML = `<p>Loading summary...</p>`;
-        
         if (allTransactionsCache.length === 0) {
             try {
                 const res = await fetch(API_URL);
@@ -272,16 +257,10 @@ document.addEventListener("DOMContentLoaded", () => {
                 return;
             }
         }
-        
         const period = walletTimeFilter.value;
         const ranges = getDateRanges(period);
         const summary = calculateSummary(allTransactionsCache, ranges);
-
-        summaryContainer.innerHTML = `
-            ${createSummaryCard('Funds', summary.current.funds, summary.previous.funds)}
-            ${createSummaryCard('Expenses', summary.current.expenses, summary.previous.expenses)}
-            ${createSummaryCard('Savings', summary.current.savings, summary.previous.savings)}
-        `;
+        summaryContainer.innerHTML = `${createSummaryCard('Funds', summary.current.funds, summary.previous.funds)}${createSummaryCard('Expenses', summary.current.expenses, summary.previous.expenses)}${createSummaryCard('Savings', summary.current.savings, summary.previous.savings)}`;
     }
 
     // --- TRANSACTION LIST LOGIC ---
@@ -294,18 +273,15 @@ document.addEventListener("DOMContentLoaded", () => {
                 totalBalance += amount;
             });
             totalBalanceDisplay.textContent = `Total: ₱${totalBalance.toFixed(2)}`;
-
             list.innerHTML = "";
             const selectedCategory = filter.value;
             const filteredData = selectedCategory === "all" ? data : data.filter(tx => tx.Category === selectedCategory);
             const sortedData = filteredData.sort((a, b) => new Date(b.Date) - new Date(a.Date));
-            
             let lastDisplayedDate = null;
             sortedData.forEach(tx => {
                 if (!tx.Date) return;
                 const txDate = new Date(tx.Date);
                 const dateKey = txDate.toLocaleDateString();
-
                 if (dateKey !== lastDisplayedDate) {
                     const header = document.createElement('li');
                     header.className = 'date-header';
@@ -313,7 +289,6 @@ document.addEventListener("DOMContentLoaded", () => {
                     list.appendChild(header);
                     lastDisplayedDate = dateKey;
                 }
-
                 const item = document.createElement("li");
                 item.className = "transaction";
                 const amount = parseFloat(String(tx.Amount).replace(/[^0-9.-]/g, '')) || 0;
@@ -321,16 +296,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 const amountClass = isExpense ? 'expense' : 'income';
                 const displayAmount = `${isExpense ? '−' : ''}₱${Math.abs(amount).toFixed(2)}`;
                 const displayTime = formatDisplayTime(txDate);
-                
-                item.innerHTML = `
-                    <div class="tx-info">
-                        <strong class="tx-description">${tx.Description}</strong>
-                        <span class="tx-category">${tx.Category} @ ${displayTime}</span>
-                    </div>
-                    <div class="tx-amount ${amountClass}">${displayAmount}</div>
-                    <button class="editBtn">•••</button>
-                `;
-                item.querySelector('.editBtn').addEventListener('click', () => openActionModal(tx));
+                item.innerHTML = `<div class="tx-info"><strong class="tx-description">${tx.Description}</strong><span class="tx-category">${tx.Category} @ ${displayTime}</span></div><div class="tx-amount ${amountClass}">${displayAmount}</div>`;
+                item.addEventListener('click', () => openActionModal(tx));
                 list.appendChild(item);
             });
         }).catch(error => {
@@ -352,10 +319,9 @@ document.addEventListener("DOMContentLoaded", () => {
         const isExpense = expenseCategories.includes(category);
         const amount = parseFloat(document.getElementById("amount").value) || 0;
         const signedAmount = isExpense ? -Math.abs(amount) : Math.abs(amount);
-
         const newEntry = { data: { ID: Date.now(), Description: document.getElementById("description").value, Amount: signedAmount.toFixed(2), Category: category, Date: combinedDateTime }};
         fetch(API_URL, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(newEntry) })
-            .then(res => { if (!res.ok) throw new Error("Failed to add transaction"); form.reset(); showView('transactionsView'); loadTransactions(); })
+            .then(res => { if (!res.ok) throw new Error("Failed to add transaction"); closeAllModals(); loadTransactions(); })
             .catch(error => console.error("Error adding transaction:", error));
     });
     
@@ -366,7 +332,6 @@ document.addEventListener("DOMContentLoaded", () => {
         const isExpense = expenseCategories.includes(category);
         const amount = parseFloat(document.getElementById("editAmount").value) || 0;
         const signedAmount = isExpense ? -Math.abs(amount) : Math.abs(amount);
-
         const updatedData = { data: { Description: document.getElementById("editDescription").value, Amount: signedAmount.toFixed(2), Category: category, Date: combinedDateTime }};
         fetch(`${API_URL}/ID/${activeTransaction.ID}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(updatedData) })
             .then(res => { if (!res.ok) throw new Error("Failed to update transaction"); closeAllModals(); loadTransactions(); })
@@ -380,6 +345,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function closeAllModals() {
+        addModal.style.display = 'none';
         actionModal.style.display = 'none';
         editModal.style.display = 'none';
         deleteConfirmModal.style.display = 'none';
@@ -388,7 +354,6 @@ document.addEventListener("DOMContentLoaded", () => {
     
     document.getElementById('editActionBtn').addEventListener('click', () => {
         actionModal.style.display = 'none';
-        
         const fullDateString = String(activeTransaction.Date || '');
         const firstSpaceIndex = fullDateString.indexOf(' ');
         let datePart, timePart;
@@ -400,21 +365,16 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         const timeComponents = timePart.split(':');
         const paddedTime = timeComponents.map(component => component.padStart(2, '0')).join(':');
-
         const [month, day, year] = datePart.split('/');
         const yyyymmddDate = `${year}-${month.padStart(2,'0')}-${day.padStart(2,'0')}`;
-
         document.getElementById('editDescription').value = activeTransaction.Description;
         const category = activeTransaction.Category;
         document.getElementById('editCategory').value = category;
         document.getElementById('editDate').value = yyyymmddDate;
         document.getElementById('editTime').value = paddedTime;
-        
         updateAmountSign(category, document.getElementById('editAmountSign'));
-
         const amount = parseFloat(String(activeTransaction.Amount).replace(/[^0-9.-]/g, '')) || 0;
         document.getElementById('editAmount').value = Math.abs(amount).toFixed(2);
-
         editModal.style.display = 'flex';
     });
 
@@ -423,6 +383,7 @@ document.addEventListener("DOMContentLoaded", () => {
         deleteConfirmModal.style.display = 'flex';
     });
     
+    document.getElementById('cancelAddBtn').addEventListener('click', closeAllModals);
     document.getElementById('cancelActionBtn').addEventListener('click', closeAllModals);
     document.getElementById('cancelEditBtn').addEventListener('click', closeAllModals);
     document.getElementById('cancelDeleteBtn').addEventListener('click', closeAllModals);
@@ -434,7 +395,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     window.addEventListener('click', (event) => {
-        if (event.target === actionModal || event.target === editModal || event.target === deleteConfirmModal) {
+        if (event.target === addModal || event.target === actionModal || event.target === editModal || event.target === deleteConfirmModal) {
             closeAllModals();
         }
     });

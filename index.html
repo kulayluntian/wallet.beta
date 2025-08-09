@@ -4,6 +4,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ZoeyWallet</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+  
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -37,29 +42,6 @@
         <ul id="transactionList"></ul>
       </div>
 
-      <!-- Add Transaction View -->
-      <div id="addTransactionView" class="view">
-        <h2>Add New Transaction</h2>
-        <form id="txForm">
-          <input type="text" id="description" placeholder="Description" required>
-          <div class="amount-wrapper">
-            <span id="addAmountSign" class="amount-sign"></span>
-            <input type="number" id="amount" placeholder="Amount" required step="0.01">
-          </div>
-          <select id="category" required>
-            <option value="" disabled selected>Select Category</option>
-            <option value="Food">Food</option>
-            <option value="Money">Money</option>
-            <option value="Expenses">Expenses</option>
-            <option value="Savings">Savings</option>
-            <option value="Miscellaneous">Miscellaneous</option>
-          </select>
-          <input type="date" id="date" required>
-          <input type="time" id="time" required step="1">
-          <button type="submit">Add Transaction</button>
-        </form>
-      </div>
-
       <!-- Wallet View -->
       <div id="walletView" class="view">
         <h2>Wallet Overview</h2>
@@ -76,7 +58,7 @@
         </div>
       </div>
 
-      <!-- Settings View (UPDATED) -->
+      <!-- Settings View -->
       <div id="settingsView" class="view">
         <h2>Settings</h2>
         <div class="setting-item">
@@ -114,13 +96,12 @@
                 <label for="formatYYYYMMDD">YYYY/MM/DD</label>
             </div>
         </div>
-
       </div>
     </main>
 
     <!-- Footer Navigation -->
     <footer class="app-footer">
-      <button class="nav-btn active" data-view="transactionsView">Transactions</button>
+      <button class="nav-btn active" data-view="transactionsView">Transaction</button>
       <button class="nav-btn" data-view="walletView">Wallet</button>
       <button class="nav-btn" data-view="settingsView">Settings</button>
     </footer>
@@ -128,6 +109,32 @@
   </div>
 
   <!-- All Modals -->
+  <div id="addModal" class="modal">
+    <div class="modal-content">
+        <h2>Add New Transaction</h2>
+        <form id="txForm">
+          <input type="text" id="description" placeholder="Description" required>
+          <div class="amount-wrapper">
+            <span id="addAmountSign" class="amount-sign"></span>
+            <input type="number" id="amount" placeholder="Amount" required step="0.01">
+          </div>
+          <select id="category" required>
+            <option value="" disabled selected>Select Category</option>
+            <option value="Food">Food</option>
+            <option value="Money">Money</option>
+            <option value="Expenses">Expenses</option>
+            <option value="Savings">Savings</option>
+            <option value="Miscellaneous">Miscellaneous</option>
+          </select>
+          <input type="date" id="date" required>
+          <input type="time" id="time" required step="1">
+          <div class="modal-actions">
+            <button type="submit" class="modal-btn-edit">Add Transaction</button>
+            <button type="button" id="cancelAddBtn" class="modal-btn-cancel">Cancel</button>
+          </div>
+        </form>
+    </div>
+  </div>
   <div id="actionModal" class="modal">
     <div class="modal-content">
       <p>Choose an action for this transaction:</p>
