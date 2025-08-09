@@ -30,7 +30,7 @@
       <!-- Transactions View -->
       <div id="transactionsView" class="view active">
         <div class="filter-container">
-          <select id="categoryFilter">
+          <select id="categoryFilter" class="styled-select">
             <option value="all">Show All</option>
             <option value="Food">Food</option>
             <option value="Money">Money</option>
@@ -46,7 +46,7 @@
       <div id="walletView" class="view">
         <h2>Wallet Overview</h2>
         <div class="wallet-filter-container">
-          <select id="walletTimeFilter">
+          <select id="walletTimeFilter" class="styled-select">
             <option value="week">This Week</option>
             <option value="day">Last 24 Hours</option>
             <option value="month">This Month</option>
@@ -118,7 +118,7 @@
             <span id="addAmountSign" class="amount-sign"></span>
             <input type="number" id="amount" placeholder="Amount" required step="0.01">
           </div>
-          <select id="category" required>
+          <select id="category" class="styled-select" required>
             <option value="" disabled selected>Select Category</option>
             <option value="Food">Food</option>
             <option value="Money">Money</option>
@@ -154,7 +154,7 @@
                   <span id="editAmountSign" class="amount-sign"></span>
                   <input type="number" id="editAmount" placeholder="Amount" required step="0.01">
               </div>
-              <select id="editCategory" required>
+              <select id="editCategory" class="styled-select" required>
                   <option value="Food">Food</option>
                   <option value="Money">Money</option>
                   <option value="Expenses">Expenses</option>
