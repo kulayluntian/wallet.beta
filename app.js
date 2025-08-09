@@ -92,17 +92,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     // --- DATE/TIME FORMATTING UTILITIES ---
-    function formatDisplayDate(dateObj) {
-        const dd = String(dateObj.getDate()).padStart(2, '0');
-        const mm = String(dateObj.getMonth() + 1).padStart(2, '0');
-        const yyyy = dateObj.getFullYear();
-        switch (preferences.dateFormat) {
-            case 'ddmmyyyy': return `${dd}/${mm}/${yyyy}`;
-            case 'yyyymmdd': return `${yyyy}/${mm}/${dd}`;
-            default: return `${mm}/${dd}/${yyyy}`;
-        }
-    }
-
     function formatDisplayTime(dateObj) {
         if (preferences.timeFormat === '12hr') {
             return dateObj.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }).replace(/:\d+ /, ' ');
@@ -168,7 +157,6 @@ document.addEventListener("DOMContentLoaded", () => {
         let start = new Date();
         let end = new Date();
         let prevStart, prevEnd;
-
         switch (period) {
             case 'day':
                 start.setHours(now.getHours() - 24, now.getMinutes(), now.getSeconds(), now.getMilliseconds());
@@ -196,17 +184,11 @@ document.addEventListener("DOMContentLoaded", () => {
                 prevEnd = new Date(start.getTime());
                 break;
         }
-        return {
-            current: { start: start, end: end },
-            previous: { start: prevStart, end: prevEnd }
-        };
+        return { current: { start: start, end: end }, previous: { start: prevStart, end: prevEnd }};
     }
 
     function calculateSummary(transactions, ranges) {
-        const summary = {
-            current: { funds: 0, expenses: 0, savings: 0 },
-            previous: { funds: 0, expenses: 0, savings: 0 }
-        };
+        const summary = { current: { funds: 0, expenses: 0, savings: 0 }, previous: { funds: 0, expenses: 0, savings: 0 } };
         const fundsCategories = ['Money'];
         const savingsCategories = ['Savings'];
         transactions.forEach(tx => {
@@ -228,8 +210,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const difference = currentAmount - previousAmount;
         let comparisonText = '';
         let comparisonClass = '';
-        const periodText = walletTimeFilter.options[walletTimeFilter.selectedIndex].text
-            .replace('This', 'last').replace('Last 24 Hours', 'previous 24 hours');
+        const periodText = walletTimeFilter.options[walletTimeFilter.selectedIndex].text.replace('This', 'last').replace('Last 24 Hours', 'previous 24 hours');
         if (previousAmount !== 0) {
             const moreOrLess = difference > 0 ? 'more' : 'less';
             comparisonText = `₱${Math.abs(difference).toFixed(2)} ${moreOrLess} than ${periodText.toLowerCase()}`;

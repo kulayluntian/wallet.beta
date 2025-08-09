@@ -113,11 +113,6 @@
     <div class="modal-content">
         <h2>Add New Transaction</h2>
         <form id="txForm">
-          <input type="text" id="description" placeholder="Description" required>
-          <div class="amount-wrapper">
-            <span id="addAmountSign" class="amount-sign"></span>
-            <input type="number" id="amount" placeholder="Amount" required step="0.01">
-          </div>
           <select id="category" class="styled-select" required>
             <option value="" disabled selected>Select Category</option>
             <option value="Food">Food</option>
@@ -126,8 +121,15 @@
             <option value="Savings">Savings</option>
             <option value="Miscellaneous">Miscellaneous</option>
           </select>
-          <input type="date" id="date" required>
-          <input type="time" id="time" required step="1">
+          <div class="amount-wrapper">
+            <span id="addAmountSign" class="amount-sign"></span>
+            <input type="number" id="amount" placeholder="Amount" required step="0.01">
+          </div>
+          <div class="date-time-wrapper">
+            <input type="date" id="date" required>
+            <input type="time" id="time" required step="1">
+          </div>
+          <input type="text" id="description" placeholder="Description" required>
           <div class="modal-actions">
             <button type="submit" class="modal-btn-edit">Add Transaction</button>
             <button type="button" id="cancelAddBtn" class="modal-btn-cancel">Cancel</button>
@@ -149,11 +151,6 @@
       <div class="modal-content">
           <h2>Edit Transaction</h2>
           <form id="editTxForm">
-              <input type="text" id="editDescription" placeholder="Description" required>
-              <div class="amount-wrapper">
-                  <span id="editAmountSign" class="amount-sign"></span>
-                  <input type="number" id="editAmount" placeholder="Amount" required step="0.01">
-              </div>
               <select id="editCategory" class="styled-select" required>
                   <option value="Food">Food</option>
                   <option value="Money">Money</option>
@@ -161,8 +158,15 @@
                   <option value="Savings">Savings</option>
                   <option value="Miscellaneous">Miscellaneous</option>
               </select>
-              <input type="date" id="editDate" required>
-              <input type="time" id="editTime" required step="1">
+              <div class="amount-wrapper">
+                  <span id="editAmountSign" class="amount-sign"></span>
+                  <input type="number" id="editAmount" placeholder="Amount" required step="0.01">
+              </div>
+              <div class="date-time-wrapper">
+                <input type="date" id="editDate" required>
+                <input type="time" id="editTime" required step="1">
+              </div>
+              <input type="text" id="editDescription" placeholder="Description" required>
               <div class="modal-actions">
                 <button type="submit" class="modal-btn-edit">Save Changes</button>
                 <button type="button" id="cancelEditBtn" class="modal-btn-cancel">Cancel</button>
