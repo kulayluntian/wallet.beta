@@ -10,6 +10,9 @@
   <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
   
   <link rel="stylesheet" href="style.css">
+  
+  <!-- Supabase Client Library -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 
@@ -47,6 +50,7 @@
         <h2>Wallet Overview</h2>
         <div class="wallet-filter-container">
           <select id="walletTimeFilter" class="styled-select">
+            <option value="all">All Time</option>
             <option value="week">This Week</option>
             <option value="day">Last 24 Hours</option>
             <option value="month">This Month</option>
@@ -69,33 +73,83 @@
           </label>
         </div>
         
-        <div class="setting-group">
-            <h3>Time Format</h3>
-            <div class="radio-group">
-                <input type="radio" id="time12hr" name="timeFormat" value="12hr">
-                <label for="time12hr">12-Hour</label>
-            </div>
-            <div class="radio-group">
-                <input type="radio" id="time24hr" name="timeFormat" value="24hr">
-                <label for="time24hr">24-Hour</label>
+        <!-- WRAPPER FOR SCROLLING -->
+        <div class="scrollable-settings-container">
+            <div id="dateTimeSettings" class="setting-group accordion">
+                <button class="accordion-header">
+                    <h3>Date & Time Format</h3>
+                    <svg class="accordion-arrow" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M7 10L12 15L17 10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </button>
+                <div class="accordion-content">
+                    <div class="setting-subsection">
+                        <h4>Display Order (Header)</h4>
+                        <p class="setting-hint">Drag and drop to reorder components in the date header.</p>
+                        <ul id="formatOrder" class="draggable-list">
+                            <li draggable="true" data-order-part="weekday">Weekday</li>
+                            <li draggable="true" data-order-part="date">Date</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="setting-subsection">
+                        <h4>Weekday</h4>
+                        <div class="setting-row"><label for="showWeekday">Show Weekday</label><input type="checkbox" id="showWeekday"></div>
+                        <div id="weekdayOptions" class="conditional-options">
+                            <div class="radio-group"><input type="radio" id="weekdayFull" name="weekdayFormat" value="full"><label for="weekdayFull">Full (e.g., Wednesday)</label></div>
+                            <div class="radio-group"><input type="radio" id="weekdayThree" name="weekdayFormat" value="three"><label for="weekdayThree">Three Letter (e.g., Wed)</label></div>
+                            <div class="radio-group"><input type="radio" id="weekdayOne" name="weekdayFormat" value="one"><label for="weekdayOne">One Letter (e.g., W)</label></div>
+                        </div>
+                    </div>
+
+                    <div class="setting-subsection">
+                        <h4>Date</h4>
+                        <div class="setting-row"><label for="showDate">Show Date</label><input type="checkbox" id="showDate"></div>
+                        <div id="dateOptions" class="conditional-options">
+                            <p class="setting-hint">Format</p>
+                            <div class="radio-group"><input type="radio" id="formatMMDDYYYY" name="dateFormat" value="mmddyyyy"><label for="formatMMDDYYYY">MM/DD/YYYY</label></div>
+                            <div class="radio-group"><input type="radio" id="formatDDMMYYYY" name="dateFormat" value="ddmmyyyy"><label for="formatDDMMYYYY">DD/MM/YYYY</label></div>
+                            <div class="radio-group"><input type="radio" id="formatYYYYMMDD" name="dateFormat" value="yyyymmdd"><label for="formatYYYYMMDD">YYYY/MM/DD</label></div>
+                            
+                            <p class="setting-hint">Date Separator</p>
+                            <input type="text" id="dateSeparatorInput" class="small-text-input" maxlength="3">
+
+                            <p class="setting-hint" style="margin-top: 1rem;">Month Style</p>
+                            <div class="radio-group"><input type="radio" id="monthFull" name="monthFormat" value="full"><label for="monthFull">Full (e.g., August)</label></div>
+                            <div class="radio-group"><input type="radio" id="monthThree" name="monthFormat" value="three"><label for="monthThree">Three Letter (e.g., Aug)</label></div>
+                            <div class="radio-group"><input type="radio" id="monthNumber" name="monthFormat" value="number"><label for="monthNumber">Number (e.g., 8)</label></div>
+                            
+                            <p class="setting-hint">Year Style</p>
+                            <div class="radio-group"><input type="radio" id="yearFull" name="yearFormat" value="full"><label for="yearFull">Full (e.g., 2025)</label></div>
+                            <div class="radio-group"><input type="radio" id="yearTwo" name="yearFormat" value="two"><label for="yearTwo">Two Digit (e.g., 25)</label></div>
+                            
+                            <p class="setting-hint">Options</p>
+                            <div class="setting-row"><label for="leadingZero">Leading Zero for Day/Month</label><input type="checkbox" id="leadingZero"></div>
+                        </div>
+                    </div>
+
+                    <div class="setting-subsection">
+                        <h4>Time</h4>
+                        <div class="setting-row"><label for="showTime">Show Time</label><input type="checkbox" id="showTime"></div>
+                        <div id="timeOptions" class="conditional-options">
+                            <p class="setting-hint">Format</p>
+                            <div class="radio-group"><input type="radio" id="time12hr" name="timeFormat" value="12hr"><label for="time12hr">12-Hour</label></div>
+                            <div class="radio-group"><input type="radio" id="time24hr" name="timeFormat" value="24hr"><label for="time24hr">24-Hour</label></div>
+                            <p class="setting-hint">Options</p>
+                            <div class="setting-row"><label for="showMinutes">Show Minutes</label><input type="checkbox" id="showMinutes"></div>
+                            <div class="setting-row"><label for="showSeconds">Show Seconds</label><input type="checkbox" id="showSeconds"></div>
+                        </div>
+                    </div>
+
+                    <div class="setting-subsection">
+                        <h4>Header Separator</h4>
+                        <p class="setting-hint">Character(s) between Weekday and Date components.</p>
+                        <input type="text" id="separatorInput" class="small-text-input">
+                    </div>
+                </div>
             </div>
         </div>
 
-        <div class="setting-group">
-            <h3>Date Format</h3>
-            <div class="radio-group">
-                <input type="radio" id="formatMMDDYYYY" name="dateFormat" value="mmddyyyy">
-                <label for="formatMMDDYYYY">MM/DD/YYYY</label>
-            </div>
-            <div class="radio-group">
-                <input type="radio" id="formatDDMMYYYY" name="dateFormat" value="ddmmyyyy">
-                <label for="formatDDMMYYYY">DD/MM/YYYY</label>
-            </div>
-            <div class="radio-group">
-                <input type="radio" id="formatYYYYMMDD" name="dateFormat" value="yyyymmdd">
-                <label for="formatYYYYMMDD">YYYY/MM/DD</label>
-            </div>
-        </div>
       </div>
     </main>
 
