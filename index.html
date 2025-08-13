@@ -13,6 +13,8 @@
   
   <!-- Supabase Client Library -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- Chart.js Library -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
 
@@ -73,7 +75,6 @@
           </label>
         </div>
         
-        <!-- WRAPPER FOR SCROLLING -->
         <div class="scrollable-settings-container">
             <div id="dateTimeSettings" class="setting-group accordion">
                 <button class="accordion-header">
@@ -162,7 +163,24 @@
 
   </div>
 
-  <!-- All Modals -->
+  <!-- Graph Modal -->
+  <div id="graphModal" class="modal">
+    <div class="modal-content modal-content-graph">
+      <button id="closeGraphBtn" class="modal-close-btn">&times;</button>
+      <div class="graph-header">
+        <h2 id="graphTitle"></h2>
+        <div class="graph-toggle-container">
+            <button id="barGraphBtn" class="graph-toggle-btn active">Bar</button>
+            <button id="lineGraphBtn" class="graph-toggle-btn">Line</button>
+        </div>
+      </div>
+      <div class="chart-container">
+        <canvas id="chartCanvas"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- All Other Modals -->
   <div id="addModal" class="modal">
     <div class="modal-content">
         <h2>Add New Transaction</h2>
@@ -239,6 +257,9 @@
   </div>
 
   <script src="app.js"></script>
+  <script src="settings.js"></script>
+  <script src="wallet.js"></script>
+  <script src="transaction.js"></script>
 
 </body>
 </html>
