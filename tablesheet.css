@@ -1,0 +1,120 @@
+/* --- THEME AND VARIABLES --- */
+:root {
+  --primary-bg: #1A1A1A;
+  --secondary-bg: #101010;
+  --primary-text: #F5E9FF;
+  --secondary-text: #BFA8D3;
+  --accent-bg: #3A3042;
+  --border-color: #4A4A4A;
+  --danger-color: #FFB3B3;
+  --success-color: #A6FFA6; 
+  --hover-bg: #2a2a2a;
+}
+
+/* --- GENERAL LAYOUT --- */
+body {
+    font-family: 'Poppins', sans-serif;
+    margin: 0;
+    background-color: var(--primary-bg);
+    color: var(--primary-text);
+}
+
+.container {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 0 2rem;
+}
+
+/* --- HEADER --- */
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+header h1 {
+    margin: 0;
+    font-size: 2.5rem;
+    font-weight: 600;
+}
+
+#downloadCsvBtn {
+    background-color: var(--accent-bg);
+    color: var(--primary-text);
+    border: none;
+    border-radius: 8px;
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+    font-family: 'Poppins', sans-serif;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+#downloadCsvBtn:hover {
+    background-color: var(--secondary-text);
+    color: var(--primary-bg);
+}
+
+
+/* --- TABLE STYLES --- */
+.table-container {
+    width: 100%;
+    overflow-x: auto; /* Allow horizontal scrolling on small screens */
+}
+
+#dataTable {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.95rem;
+}
+
+#dataTable thead {
+    background-color: var(--accent-bg);
+}
+
+#dataTable th, #dataTable td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid var(--border-color);
+}
+
+#dataTable th {
+    font-weight: 600;
+    color: var(--primary-text);
+}
+
+#dataTable tbody tr {
+    background-color: var(--secondary-bg);
+    transition: background-color 0.2s ease;
+}
+
+#dataTable tbody tr:hover {
+    background-color: var(--hover-bg);
+}
+
+#dataTable tbody td {
+    color: var(--secondary-text);
+}
+
+#dataTable tbody td:first-child {
+    font-weight: 500;
+}
+
+/* Specific column styles */
+#dataTable .amount {
+    font-weight: 600;
+    text-align: right;
+    white-space: nowrap;
+}
+
+#dataTable .amount.income {
+    color: var(--success-color);
+}
+
+#dataTable .amount.expense {
+    color: var(--danger-color);
+}
