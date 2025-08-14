@@ -7,6 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- DOM ELEMENTS ---
     const tableBody = document.getElementById('dataTableBody');
     const downloadBtn = document.getElementById('downloadCsvBtn');
+    const totalBalanceDisplay = document.getElementById('totalBalanceDisplay'); // New element
 
     // --- STATE ---
     let tableData = [];
@@ -46,8 +47,17 @@ document.addEventListener('DOMContentLoaded', () => {
         if (error) {
             console.error('Error fetching data:', error);
             tableBody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: var(--danger-color);">Failed to load data. Check console.</td></tr>`;
+            totalBalanceDisplay.textContent = 'Error';
             return;
         }
+
+        // --- NEW: Calculate and display the total balance ---
+        let totalBalance = 0;
+        data.forEach(tx => {
+            totalBalance += Number(tx.Amount) || 0;
+        });
+        totalBalanceDisplay.textContent = `Total: ₱${totalBalance.toFixed(2)}`;
+        // --- END NEW ---
 
         data.sort((a, b) => parseCustomDateString(b.Date) - parseCustomDateString(a.Date));
         
@@ -115,7 +125,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.setAttribute('href', url);
-        link.setAttribute('download', 'export.csv');
+        link.setAttribute('download', 'zoeywallet_export.csv');
         link.style.visibility = 'hidden';
         document.body.appendChild(link);
         link.click();

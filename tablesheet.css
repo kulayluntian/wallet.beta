@@ -59,6 +59,18 @@ header h1 {
     color: var(--primary-bg);
 }
 
+.total-balance {
+    background-color: var(--accent-bg);
+    color: var(--primary-text);
+    border-radius: 12px;
+    padding: 0.5rem 1.5rem;
+    font-size: 1.2rem;
+    font-weight: 500;
+    text-align: center;
+    white-space: nowrap;
+    margin: 0 2rem; /* Add space around the total */
+}
+
 
 /* --- TABLE STYLES --- */
 .table-container {
@@ -117,4 +129,31 @@ header h1 {
 
 #dataTable .amount.expense {
     color: var(--danger-color);
+}
+
+/* --- RESPONSIVE STYLES for MOBILE --- */
+@media (max-width: 600px) {
+    .container {
+        padding: 0 1rem;
+        margin-top: 1rem;
+    }
+
+    header {
+        flex-direction: column; /* Stack items vertically */
+        gap: 1rem;             /* Add space between stacked items */
+        align-items: center;   /* Center-align the content */
+    }
+
+    header h1 {
+        font-size: 2rem; /* Make the title slightly smaller */
+    }
+
+    .total-balance {
+        margin: 0; /* Remove horizontal margin on mobile */
+    }
+
+    #downloadCsvBtn {
+        width: 100%; /* Make the button full-width for easy tapping */
+        text-align: center;
+    }
 }
