@@ -37,11 +37,7 @@
         <div class="filter-container">
           <select id="categoryFilter" class="styled-select">
             <option value="all">Show All</option>
-            <option value="Food">Food</option>
-            <option value="Money">Money</option>
-            <option value="Expenses">Expenses</option>
-            <option value="Savings">Savings</option>
-            <option value="Miscellaneous">Miscellaneous</option>
+             <!-- Categories populated by JS -->
           </select>
         </div>
         <ul id="transactionList"></ul>
@@ -76,6 +72,31 @@
         </div>
         
         <div class="scrollable-settings-container">
+            <div id="categorySettings" class="setting-group accordion">
+                <button class="accordion-header">
+                    <h3>Manage Categories</h3>
+                    <svg class="accordion-arrow" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M7 10L12 15L17 10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </button>
+                <div class="accordion-content">
+                    <div class="setting-subsection">
+                        <h4>Add New Category</h4>
+                        <div class="add-category-form">
+                            <input type="text" id="newCategoryInput" class="small-text-input" placeholder="e.g., Groceries">
+                            <button id="addCategoryBtn" class="add-btn">Add</button>
+                        </div>
+                    </div>
+                    <div class="setting-subsection">
+                        <h4>Your Custom Categories</h4>
+                        <p class="setting-hint">This list shows all categories found in your transactions that are not default categories. Tap to delete.</p>
+                        <ul id="customCategoryList" class="managed-list">
+                            <!-- User categories will be listed here by JS -->
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
             <div id="dateTimeSettings" class="setting-group accordion">
                 <button class="accordion-header">
                     <h3>Date & Time Format</h3>
@@ -86,11 +107,16 @@
                 <div class="accordion-content">
                     <div class="setting-subsection">
                         <h4>Display Order (Header)</h4>
-                        <p class="setting-hint">Drag and drop to reorder components in the date header.</p>
-                        <ul id="formatOrder" class="draggable-list">
-                            <li draggable="true" data-order-part="weekday">Weekday</li>
-                            <li draggable="true" data-order-part="date">Date</li>
-                        </ul>
+                        <p class="setting-hint">Tap the button to swap the order.</p>
+                        <div class="reorder-container">
+                            <span class="reorder-item" id="orderItem1"></span>
+                            <button id="swapOrderBtn" class="reorder-swap-btn" aria-label="Swap order">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M17 4V20M17 4L20 7M17 4L14 7M7 20V4M7 20L4 17M7 20L10 17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </button>
+                            <span class="reorder-item" id="orderItem2"></span>
+                        </div>
                     </div>
                     
                     <div class="setting-subsection">
@@ -186,17 +212,9 @@
         <h2>Add New Transaction</h2>
         <form id="txForm">
           <select id="category" class="styled-select" required>
-            <option value="" disabled selected>Select Category</option>
-            <option value="Food">Food</option>
-            <option value="Money">Money</option>
-            <option value="Expenses">Expenses</option>
-            <option value="Savings">Savings</option>
-            <option value="Miscellaneous">Miscellaneous</option>
+            <option value="" disabled selected>Loading categories...</option>
           </select>
-          <div class="amount-wrapper">
-            <span id="addAmountSign" class="amount-sign"></span>
-            <input type="number" id="amount" placeholder="Amount" required step="0.01">
-          </div>
+          <input type="number" id="amount" placeholder="Amount (e.g. -50 or 50)" required step="0.01">
           <div class="date-time-wrapper">
             <input type="date" id="date" required>
             <input type="time" id="time" required step="1">
@@ -209,31 +227,15 @@
         </form>
     </div>
   </div>
-  <div id="actionModal" class="modal">
-    <div class="modal-content">
-      <p>Choose an action for this transaction:</p>
-      <div class="modal-actions">
-        <button id="editActionBtn" class="modal-btn-edit">Edit</button>
-        <button id="deleteActionBtn" class="modal-btn-delete">Delete</button>
-        <button id="cancelActionBtn" class="modal-btn-cancel">Cancel</button>
-      </div>
-    </div>
-  </div>
+
   <div id="editModal" class="modal">
       <div class="modal-content">
           <h2>Edit Transaction</h2>
           <form id="editTxForm">
               <select id="editCategory" class="styled-select" required>
-                  <option value="Food">Food</option>
-                  <option value="Money">Money</option>
-                  <option value="Expenses">Expenses</option>
-                  <option value="Savings">Savings</option>
-                  <option value="Miscellaneous">Miscellaneous</option>
+                 <option>Loading categories...</option>
               </select>
-              <div class="amount-wrapper">
-                  <span id="editAmountSign" class="amount-sign"></span>
-                  <input type="number" id="editAmount" placeholder="Amount" required step="0.01">
-              </div>
+              <input type="number" id="editAmount" placeholder="Amount (e.g. -50 or 50)" required step="0.01">
               <div class="date-time-wrapper">
                 <input type="date" id="editDate" required>
                 <input type="time" id="editTime" required step="1">
@@ -252,6 +254,16 @@
       <div class="modal-actions">
         <button id="confirmDeleteBtn" class="modal-btn-delete">Yes, Delete</button>
         <button id="cancelDeleteBtn" class="modal-btn-cancel">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="deleteCategoryConfirmModal" class="modal">
+    <div class="modal-content">
+      <p id="deleteCategoryMessage"></p>
+      <div class="modal-actions">
+        <button id="confirmDeleteCategoryBtn" class="modal-btn-delete">Yes, Delete</button>
+        <button id="cancelDeleteCategoryBtn" class="modal-btn-cancel">Cancel</button>
       </div>
     </div>
   </div>

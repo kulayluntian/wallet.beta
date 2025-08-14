@@ -60,8 +60,6 @@
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                // *** THE FAULTY CUSTOM ANIMATION BLOCK IS GONE ***
-                // This allows the default "grow from bottom" animation to work correctly.
                 plugins: {
                     legend: { display: false },
                     tooltip: {
@@ -234,6 +232,7 @@
                 const { data, error } = await app.supabaseClient.from('Wallet').select('*');
                 if (error) throw error;
                 app.allTransactionsCache = data;
+                app.updateCategories(); // Ensure categories are updated if loaded here
             } catch (error) {
                 console.error("Failed to fetch data for wallet view:", error);
                 summaryContainer.innerHTML = `<p>Could not load summary data.</p>`;
