@@ -1,22 +1,21 @@
-// sw.js - Service Worker (Definitive Version)
+// sw.js - Service Worker (GitHub Pages Version)
 
-const CACHE_NAME = 'zoeywallet-cache-v3'; // Increment the version
+const CACHE_NAME = 'zoeywallet-cache-v4'; // Increment version for a clean install
 
-// All files needed for the app to run offline
+// [THE FIX] All paths must be relative to the scope (/wallet.beta/)
 const CACHE_FILES = [
-    '/',
-    'index.html',
-    'style.css',
-    'app.js',
-    'transaction.js',
-    'settings.js',
-    'wallet.js',
+    './', // Represents the root of the scope
+    './index.html',
+    './style.css',
+    './app.js',
+    './transaction.js',
+    './settings.js',
+    './wallet.js',
     'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2',
     'https://cdn.jsdelivr.net/npm/chart.js',
     'https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900&display=swap'
 ];
 
-// On install, cache the app shell
 self.addEventListener('install', (event) => {
     console.log('[Service Worker] Install');
     event.waitUntil(
@@ -25,10 +24,9 @@ self.addEventListener('install', (event) => {
             return cache.addAll(CACHE_FILES);
         })
     );
-    self.skipWaiting(); // Force activation of new worker
+    self.skipWaiting();
 });
 
-// On activate, clean up old caches
 self.addEventListener('activate', (event) => {
     console.log('[Service Worker] Activate');
     event.waitUntil(
@@ -41,16 +39,13 @@ self.addEventListener('activate', (event) => {
             }));
         })
     );
-    return self.clients.claim(); // Take control of open pages
+    return self.clients.claim();
 });
 
-// On fetch, use a cache-first strategy
 self.addEventListener('fetch', (event) => {
     if (event.request.method !== 'GET') return;
-
     event.respondWith(
         caches.match(event.request).then((response) => {
-            // Return from cache, or fetch from network if not in cache
             return response || fetch(event.request);
         })
     );

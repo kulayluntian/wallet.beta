@@ -7,6 +7,20 @@ document.addEventListener("DOMContentLoaded", async () => {
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imtpa2F2dGhhbWFzbGF4eGRwYWJqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTUwNzEwMTAsImV4cCI6MjA3MDY0NzAxMH0.-Opk4pzWgfJwILshx6HhyE7bi2eeur8t8x-5C2_fxGE';
     
     ZoeyWalletApp.supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    // ... (rest of variables are the same)
+
+    // --- SERVICE WORKER REGISTRATION (CORRECTED FOR GITHUB PAGES) ---
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            // [THE FIX] We explicitly define the scope to match your sub-folder structure.
+            navigator.serviceWorker.register('sw.js', { scope: '/wallet.beta/' }) 
+                .then(reg => console.log('Service Worker registered successfully with scope: ', reg.scope))
+                .catch(err => console.error('Service Worker registration failed: ', err));
+        });
+    }
+    
+    // ... (The rest of your app.js file is correct and remains unchanged) ...
+    // ... PASTE THE REST OF YOUR app.js file here ...
     ZoeyWalletApp.allTransactionsCache = [];
     ZoeyWalletApp.categoriesCache = [];
     ZoeyWalletApp.defaultCategories = ["Food", "Money", "Expenses", "Savings", "Miscellaneous"];
@@ -16,26 +30,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     const navButtons = document.querySelectorAll(".nav-btn");
     const views = document.querySelectorAll(".view");
     const offlineBanner = document.getElementById("offlineBanner");
-
-    // --- SERVICE WORKER REGISTRATION (CORRECTED) ---
-    if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-            // [THE FIX] Use a relative path to ensure it works in any directory.
-            navigator.serviceWorker.register('sw.js') 
-                .then(reg => console.log('Service Worker registered successfully', reg))
-                .catch(err => console.error('Service Worker registration failed', err));
-        });
-    }
     
     // --- LOCAL DATA & QUEUE MANAGEMENT ---
     const PENDING_ACTIONS_KEY = 'pendingActions';
     const OFFLINE_CACHE_KEY = 'zoeywallet_offline_data';
     
-    ZoeyWalletApp.saveCacheToLocal = () => { /* ... unchanged ... */ };
-    ZoeyWalletApp.queueAction = (action) => { /* ... unchanged ... */ };
-    ZoeyWalletApp.processSyncQueue = async () => { /* ... unchanged ... */ };
-    
-    // ... PASTE THE UNCHANGED FUNCTIONS HERE ...
     ZoeyWalletApp.saveCacheToLocal = () => {
         try {
             const dataToSave = { transactions: ZoeyWalletApp.allTransactionsCache };
