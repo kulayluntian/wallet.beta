@@ -1,9 +1,8 @@
-// sw.js - Service Worker (Robust Version)
+// sw.js - Service Worker (Definitive Version)
 
-// [FIX] Increment the cache name. This is crucial for forcing an update.
-const CACHE_NAME = 'zoeywallet-cache-v2';
+const CACHE_NAME = 'zoeywallet-cache-v3'; // Increment the version
 
-// List of files to cache for the app shell to work offline.
+// All files needed for the app to run offline
 const CACHE_FILES = [
     '/',
     'index.html',
@@ -17,7 +16,7 @@ const CACHE_FILES = [
     'https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900&display=swap'
 ];
 
-// The install event: fires when the service worker is first installed.
+// On install, cache the app shell
 self.addEventListener('install', (event) => {
     console.log('[Service Worker] Install');
     event.waitUntil(
@@ -26,18 +25,15 @@ self.addEventListener('install', (event) => {
             return cache.addAll(CACHE_FILES);
         })
     );
-    // [FIX] Force the new service worker to become active immediately.
-    // This prevents the "waiting to activate" state that causes update issues.
-    self.skipWaiting();
+    self.skipWaiting(); // Force activation of new worker
 });
 
-// The activate event: fires after installation. Cleans up old caches.
+// On activate, clean up old caches
 self.addEventListener('activate', (event) => {
     console.log('[Service Worker] Activate');
     event.waitUntil(
         caches.keys().then((keyList) => {
             return Promise.all(keyList.map((key) => {
-                // If the cache key is not our current cache, delete it.
                 if (key !== CACHE_NAME) {
                     console.log('[Service Worker] Removing old cache', key);
                     return caches.delete(key);
@@ -45,26 +41,17 @@ self.addEventListener('activate', (event) => {
             }));
         })
     );
-    // [FIX] Take immediate control of all open clients (tabs).
-    return self.clients.claim();
+    return self.clients.claim(); // Take control of open pages
 });
 
-// The fetch event: fires for every network request.
-// We use a "Cache first, then network fallback" strategy.
+// On fetch, use a cache-first strategy
 self.addEventListener('fetch', (event) => {
-    // We only want to handle GET requests.
-    if (event.request.method !== 'GET') {
-        return;
-    }
+    if (event.request.method !== 'GET') return;
 
     event.respondWith(
         caches.match(event.request).then((response) => {
-            // If the request is in the cache, return the cached version.
-            if (response) {
-                return response;
-            }
-            // If it's not in the cache, fetch it from the network.
-            return fetch(event.request);
+            // Return from cache, or fetch from network if not in cache
+            return response || fetch(event.request);
         })
     );
 });
