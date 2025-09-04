@@ -17,24 +17,23 @@
     let activeTransaction = null;
 
     // --- UTILITY FUNCTIONS ---
-    function getTodayDateString() { return new Date().toISOString().split('T')[0]; }
+
+    /**
+     * [THE FIX] This new function correctly gets the LOCAL date in YYYY-MM-DD format,
+     * avoiding all UTC conversion problems.
+     */
+    function getTodayDateString() {
+        const today = new Date();
+        const year = today.getFullYear();
+        const month = String(today.getMonth() + 1).padStart(2, '0'); // Months are 0-11
+        const day = String(today.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    }
+
     function getCurrentTimeString() { return new Date().toTimeString().split(' ')[0]; }
     
-    /**
-     * [THE FIX] This function now manually builds the exact date string format
-     * that matches your database's text column (YYYY-MM-DD HH:MM:SS+08).
-     */
-    function formatDateTimeForStorage(dateObj) {
-        const pad = (num) => String(num).padStart(2, '0');
-
-        const year = dateObj.getFullYear();
-        const month = pad(dateObj.getMonth() + 1);
-        const day = pad(dateObj.getDate());
-        const hours = pad(dateObj.getHours());
-        const minutes = pad(dateObj.getMinutes());
-        const seconds = pad(dateObj.getSeconds());
-
-        return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}+08`;
+    function formatDateTimeForStorage(dateValue, timeValue) {
+        return `${dateValue} ${timeValue}+08`;
     }
     
     function closeAllModals() {
@@ -46,34 +45,30 @@
 
     function openEditModal(transaction) {
         activeTransaction = transaction;
-        // Since the date is now text, we need to parse it carefully for the input fields
-        const txDate = new Date(transaction.Date.replace(' ', 'T').replace('+08', ''));
+        const datePart = transaction.Date.substring(0, 10);
+        const timePart = transaction.Date.substring(11, 19);
         
         document.getElementById('editDescription').value = transaction.Description;
         document.getElementById('editCategory').value = transaction.Category;
-        document.getElementById('editDate').value = txDate.toISOString().split('T')[0];
-        document.getElementById('editTime').value = txDate.toTimeString().split(' ')[0];
+        document.getElementById('editDate').value = datePart;
+        document.getElementById('editTime').value = timePart;
         document.getElementById('editAmount').value = (Number(transaction.Amount) || 0).toFixed(2);
         editModal.style.display = 'flex';
     }
 
-    // The rest of the file is correct and does not need to be changed.
-    // All functions from here on are the same as the last working version.
-
-    function openDeleteModal(transaction) {
-        activeTransaction = transaction;
-        deleteConfirmModal.style.display = 'flex';
-    }
-
+    // --- ACTION HANDLERS ---
     function handleAddTransaction(e) {
         e.preventDefault();
-        const dateFromForm = new Date(`${document.getElementById("date").value}T${document.getElementById("time").value}`);
+        const dateValue = document.getElementById("date").value;
+        const timeValue = document.getElementById("time").value;
+        const finalDateString = formatDateTimeForStorage(dateValue, timeValue);
+
         const newEntry = {
             ID: Date.now(),
             Description: document.getElementById("description").value,
             Amount: parseFloat(document.getElementById("amount").value) || 0,
             Category: document.getElementById("category").value,
-            Date: formatDateTimeForStorage(dateFromForm)
+            Date: finalDateString
         };
         closeAllModals();
         app.allTransactionsCache.unshift(newEntry);
@@ -86,12 +81,15 @@
     function handleEditTransaction(e) {
         e.preventDefault();
         const idToEdit = activeTransaction.ID;
-        const dateFromForm = new Date(`${document.getElementById("editDate").value}T${document.getElementById("editTime").value}`);
+        const dateValue = document.getElementById("editDate").value;
+        const timeValue = document.getElementById("editTime").value;
+        const finalDateString = formatDateTimeForStorage(dateValue, timeValue);
+
         const updatedData = {
             Description: document.getElementById("editDescription").value,
             Amount: parseFloat(document.getElementById("editAmount").value) || 0,
             Category: document.getElementById("editCategory").value,
-            Date: formatDateTimeForStorage(dateFromForm)
+            Date: finalDateString
         };
         closeAllModals();
         const index = app.allTransactionsCache.findIndex(tx => String(tx.ID) === String(idToEdit));
@@ -104,6 +102,12 @@
         }
     }
 
+    // The rest of the file is correct and does not need to be changed.
+    function openDeleteModal(transaction) {
+        activeTransaction = transaction;
+        deleteConfirmModal.style.display = 'flex';
+    }
+    
     function handleDeleteTransaction() {
         const idToDelete = activeTransaction.ID;
         closeAllModals();
@@ -121,7 +125,6 @@
             totalBalance += (tx.Category === 'Savings' ? -amount : amount);
         });
         totalBalanceDisplay.textContent = `Total: ₱${totalBalance.toFixed(2)}`;
-        
         const selectedCategory = filter.value;
         const filteredData = selectedCategory === "all" 
             ? app.allTransactionsCache 
@@ -136,7 +139,6 @@
             return;
         }
         const sortedData = filteredData.sort((a, b) => new Date(b.Date) - new Date(a.Date));
-        
         let lastHeaderDate = null;
         sortedData.forEach(tx => {
             if (!tx.Date) return;
@@ -154,7 +156,6 @@
             const item = document.createElement("li");
             item.className = "transaction";
             item.dataset.id = tx.ID;
-
             const amount = Number(tx.Amount) || 0;
             let amountClass = '', displayAmount = '';
             
@@ -166,9 +167,7 @@
                 amountClass = isExpense ? 'expense' : 'income';
                 displayAmount = `${isExpense ? '−' : ''}₱${Math.abs(amount).toFixed(2)}`;
             }
-
             const displayTime = app.settings.formatTransactionTime(txDate);
-            
             item.innerHTML = `
                 <div class="tx-main">
                     <div class="tx-info">
@@ -204,7 +203,6 @@
              const cachedData = JSON.parse(localStorage.getItem('zoeywallet_offline_data'));
              app.allTransactionsCache = (cachedData && cachedData.transactions) ? cachedData.transactions : [];
         }
-
         app.updateCategories();
         app.transaction.load();
     };
@@ -222,10 +220,8 @@
         list.addEventListener('click', (e) => {
             const clickedTxLi = e.target.closest('.transaction');
             if (!clickedTxLi || !clickedTxLi.dataset.id) return;
-            
             const transactionId = clickedTxLi.dataset.id;
             const transactionData = app.allTransactionsCache.find(t => String(t.ID) === transactionId);
-            
             if (!transactionData) return;
 
             if (e.target.classList.contains('edit')) { openEditModal(transactionData); }
