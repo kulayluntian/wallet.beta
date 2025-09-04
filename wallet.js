@@ -190,7 +190,7 @@
 
             const checkPeriod = (period) => {
                 if (fundsCategories.includes(tx.Category)) period.funds += amount;
-                if (savingsCategories.includes(tx.Category)) period.savings += Math.abs(amount); 
+                if (savingsCategories.includes(tx.Category)) period.savings += amount; 
                 if (amount < 0) period.expenses += Math.abs(amount);
             };
 
@@ -225,9 +225,20 @@
     }
     
     app.wallet.render = async () => {
-        summaryContainer.innerHTML = `<p>Loading summary...</p>`;
+        summaryContainer.innerHTML = ""; // Clear content
+
+        if (!navigator.onLine) {
+            const warning = document.createElement('p');
+            warning.style.cssText = "background-color: var(--accent-bg); color: var(--accent-text); padding: 0.75rem; border-radius: 8px; text-align: center; font-size: 0.9em; margin-bottom: 1rem; border: 1px dashed var(--secondary-text);";
+            warning.textContent = 'Note: The summary below is based on limited cached data and may be incomplete.';
+            summaryContainer.appendChild(warning);
+        } else if (app.allTransactionsCache.length === 0) {
+            // Only show loading if online and cache is empty
+            summaryContainer.innerHTML = `<p>Loading summary...</p>`;
+        }
         
-        if (app.allTransactionsCache.length === 0) {
+        // This check is a fallback. The main fetch should happen in transaction.js
+        if (app.allTransactionsCache.length === 0 && navigator.onLine) {
             try {
                 const { data, error } = await app.supabaseClient.from('Wallet').select('*');
                 if (error) throw error;

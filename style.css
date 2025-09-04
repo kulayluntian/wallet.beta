@@ -34,8 +34,19 @@ body { font-family: 'Poppins', sans-serif; margin: 0; background-color: var(--pr
 .app-container { display: flex; flex-direction: column; height: 100vh; max-width: 600px; margin: auto; background-color: var(--secondary-bg); }
 
 /* --- HEADER STYLES --- */
-.app-header { display: flex; justify-content: space-between; align-items: center; padding: 1rem 1.5rem; background-color: var(--header-bg); flex-shrink: 0; }
+.app-header { display: flex; justify-content: space-between; align-items: center; padding: 1rem 1.5rem; background-color: var(--header-bg); flex-shrink: 0; flex-wrap: wrap; }
 .app-title { font-size: 1.8rem; font-weight: 600; color: var(--primary-text); }
+#offlineBanner {
+  width: 100%;
+  background-color: #FFD700; /* Gold/Yellow */
+  color: #000000; /* Black */
+  text-align: center;
+  padding: 0.5rem;
+  margin-top: 1rem;
+  border-radius: 8px;
+  font-size: 0.9em;
+  font-weight: 500;
+}
 .header-btn { background: none; border: none; color: var(--primary-text); font-size: 2.5rem; font-weight: 300; cursor: pointer; }
 .total-balance { background-color: var(--accent-bg); color: var(--accent-text); border: none; border-radius: 12px; padding: 0.5rem 1rem; font-size: 1.1rem; font-weight: 500; text-align: center; margin: 0 1rem; white-space: nowrap; }
 .app-main { flex-grow: 1; overflow: hidden; }
@@ -370,3 +381,7 @@ input:checked + .slider:before { transform: translateX(22px); }
 .summary-comparison.positive { color: var(--success-color); }
 .summary-comparison.negative { color: var(--danger-color); }
 .summary-amount { font-size: 1.4em; font-weight: 600; color: var(--primary-text); }
+
+/* Custom Savings Colors */
+.tx-amount.savings-income { color: #A6D8FF; }
+.tx-amount.savings-expense { color: #FFDDA6; }
